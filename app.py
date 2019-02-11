@@ -1,4 +1,4 @@
-def log(string): 
+def log(string):
     l = (len(string) + 8)
     print()
     print('  ' + ('-' * l))
@@ -21,13 +21,13 @@ app = flask.Flask(__name__)
 
 log("Loading model")
 
-model = keras.load_model('Model.h5') # Load Keras model 
+model = keras.load_model('Model.h5') # Load Keras model
 model._make_predict_function()
 graph = tf.get_default_graph()
 
 if not os.path.exists('images'):  os.makedirs('images') # Create images folder if it doesn't exist
 
-images = [None] * (len(next(os.walk('images'))[2]) + 1) # Create empty array with size of number of images in 'images' folder. 
+images = [None] * (len(next(os.walk('images'))[2]) + 1) # Create empty array with size of number of images in 'images' folder.
 
 
 # --------------
@@ -88,14 +88,13 @@ def process():
 
     with graph.as_default():
         pred = float(model.predict(img))
-        
+
         log('Prediction for image ' + format(id, '03') + ': ' + str(round(pred, 3)))
 
-        if pred <= 0.5:  return flask.send_file('web_client/html/ok.html')
+        if pred <= 0.6:  return flask.send_file('web_client/html/ok.html')
         else:            return flask.send_file('web_client/html/infected.html')
 
 
-if __name__ == "__main__": 
+if __name__ == "__main__":
     log("Server started!")
     app.run(port = 8080)
-
