@@ -1,38 +1,52 @@
-def log(string):
-    l = (len(string) + 8)
+# ---------------
+#     Logger
+# ---------------
+
+def log(string): 
+    l = len(string) + 8
     print()
     print('  ' + ('-' * l))
     print('  |   ' + string + '   |')
     print('  ' + ('-' * l))
     print()
 
+
+# ---------------
+#     Imports
+# ---------------
+
 log("Importing modules")
 
-import keras.models as keras
+from  keras import models as keras
 import tensorflow as tf
 from PIL import Image
 from io import BytesIO
 import numpy as np
-import base64
+from base64 import b64decode
 import flask
 import os
 
 app = flask.Flask(__name__)
 
+
+# --------------
+#     Model
+# --------------
+
 log("Loading model")
 
-model = keras.load_model('Model.h5') # Load Keras model
+model = keras.load_model('Model.h5') # Load Keras model 
 model._make_predict_function()
 graph = tf.get_default_graph()
 
 if not os.path.exists('images'):  os.makedirs('images') # Create images folder if it doesn't exist
 
-images = [None] * (len(next(os.walk('images'))[2]) + 1) # Create empty array with size of number of images in 'images' folder.
+images = [None] * (len(next(os.walk('images'))[2]) + 1) # Create empty array with size of number of images in 'images' folder. 
 
 
-# --------------
-#     Routes
-# --------------
+# ----------------------
+#     HTML, CSS & JS
+# ----------------------
 
 @app.route('/js/<path:path>')
 def send_js(path):
@@ -54,6 +68,9 @@ def send_audio(path):
     return flask.send_from_directory('web_client/audio', path)
 
 
+# --------------
+#     Routes
+# --------------
 
 @app.route("/")
 def root():
@@ -70,7 +87,7 @@ def process():
     b64 = flask.request.form["image"]
     b64 = b64.replace('data:image/png;base64,', '')
 
-    b64 = base64.b64decode(b64)
+    b64 = b64decode(b64)
 
     file = 'images/image_' + format(id, '03') + '.png'
 
@@ -88,13 +105,17 @@ def process():
 
     with graph.as_default():
         pred = float(model.predict(img))
-
+        
         log('Prediction for image ' + format(id, '03') + ': ' + str(round(pred, 3)))
 
         if pred <= 0.6:  return flask.send_file('web_client/html/ok.html')
         else:            return flask.send_file('web_client/html/infected.html')
 
 
-if __name__ == "__main__":
+# -------------
+#     Start
+# -------------
+
+if __name__ == "__main__": 
     log("Server started!")
     app.run(port = 8080)
